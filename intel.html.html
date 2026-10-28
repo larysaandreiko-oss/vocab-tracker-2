@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Словарь: lore — strip mall — тренажёр</title>
+<style>
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/source-serif-pro/3.6.4/source-serif-pro.min.css');
+
+  :root{
+    --paper:#EDE3CB;
+    --paper-card:#FBF6E9;
+    --ink:#2B2116;
+    --ink-soft:#5B4E3B;
+    --rust:#A6532E;
+    --rust-deep:#8A4224;
+    --line:#CBBE9C;
+    --good:#4C6B4F;
+    --bad:#A6392E;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:radial-gradient(rgba(43,33,22,0.035) 1px, transparent 1px);
+    background-size:3px 3px;
+    color:var(--ink);
+    font-family:"Source Serif Pro", Georgia, "Times New Roman", serif;
+    min-height:100vh;
+    padding:32px 16px 64px;
+    display:flex;
+    justify-content:center;
+  }
+  .sheet{width:100%; max-width:680px;}
+  header{margin-bottom:28px; border-bottom:2px solid var(--ink); padding-bottom:16px;}
+  header h1{font-size:1.6rem; font-weight:600; margin:0 0 4px; letter-spacing:0.2px;}
+  header p{margin:0; color:var(--ink-soft); font-size:0.95rem; font-style:italic;}
+
+  nav.tabs{display:flex; flex-wrap:wrap; gap:2px; margin-bottom:20px;}
+  nav.tabs button{
+    flex:1 1 auto; min-width:110px; padding:11px 8px;
+    font-family:inherit; font-size:0.92rem;
+    border:1px solid var(--ink); background:var(--paper); color:var(--ink-soft);
+    cursor:pointer; border-bottom:none; transition:background .15s, color .15s;
+  }
+  nav.tabs button:first-child{border-radius:4px 0 0 0;}
+  nav.tabs button:last-child{border-radius:0 4px 0 0;}
+  nav.tabs button.active{background:var(--paper-card); color:var(--ink); font-weight:600;}
+
+  .card{
+    background:var(--paper-card); border:1px solid var(--ink); border-radius:0 0 4px 4px;
+    padding:28px 26px; box-shadow:3px 3px 0 rgba(43,33,22,0.12); min-height:340px;
+    display:flex; flex-direction:column;
+  }
+
+  .progress-row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; font-size:0.85rem; color:var(--ink-soft);}
+  .progress-bar{height:4px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:22px;}
+  .progress-fill{height:100%; background:var(--rust); transition:width .3s ease;}
+
+  .prompt-word{font-size:1.9rem; font-weight:600; margin:0 0 20px; color:var(--rust-deep);}
+  .options{display:flex; flex-direction:column; gap:10px; flex:1;}
+  .option{
+    text-align:left; padding:13px 16px; border:1px solid var(--line); border-radius:4px;
+    background:#fff; font-family:inherit; font-size:1rem; color:var(--ink); cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .option:hover{border-color:var(--ink-soft);}
+  .option.correct{background:#E4EBDD; border-color:var(--good);}
+  .option.incorrect{background:#F3DEDA; border-color:var(--bad);}
+  .option:disabled{cursor:default;}
+
+  .sentence{font-size:1.08rem; line-height:1.75; margin-bottom:22px;}
+  .sentence .gap{display:inline-block; min-width:110px; border-bottom:2px solid var(--ink); text-align:center; font-style:italic; color:var(--ink-soft);}
+  .fill-input-row{display:flex; gap:10px; margin-top:auto;}
+  input[type="text"]{flex:1; padding:11px 14px; font-family:inherit; font-size:1rem; border:1px solid var(--ink-soft); border-radius:4px; background:#fff;}
+  input[type="text"]:focus{outline:2px solid var(--rust); outline-offset:1px;}
+
+  .btn{padding:11px 20px; font-family:inherit; font-size:0.95rem; font-weight:600; border:none; border-radius:4px; cursor:pointer; background:var(--rust); color:#fff; transition:background .15s;}
+  .btn:hover{background:var(--rust-deep);}
+  .btn.secondary{background:transparent; color:var(--ink-soft); border:1px solid var(--line);}
+  .btn.secondary:hover{background:rgba(0,0,0,0.03);}
+  .btn:disabled{opacity:0.4; cursor:default;}
+
+  .feedback{margin-top:14px; font-size:0.95rem; min-height:22px;}
+  .feedback.good{color:var(--good);}
+  .feedback.bad{color:var(--bad);}
+
+  .footer-row{display:flex; justify-content:space-between; align-items:center; margin-top:20px;}
+
+  .match-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px; flex:1;}
+  .match-col{display:flex; flex-direction:column; gap:8px;}
+  .match-item{padding:12px 14px; border:1px solid var(--line); border-radius:4px; background:#fff; font-size:0.92rem; cursor:pointer; text-align:left; font-family:inherit;}
+  .match-item.selected{border-color:var(--rust); background:#FBEEE7;}
+  .match-item.matched{background:#E4EBDD; border-color:var(--good); color:var(--ink-soft); cursor:default;}
+  .match-item.wrong-flash{background:#F3DEDA; border-color:var(--bad);}
+
+  .story-text{font-size:1.0rem; line-height:2.2; text-align:left;}
+  .blank-wrap{display:inline-flex; align-items:baseline; gap:2px; margin:0 2px;}
+  .hint-letter{font-style:italic; color:var(--ink-soft); font-size:0.9em;}
+  .story-input{padding:2px 6px; font-family:inherit; font-size:0.95em; border:none; border-bottom:2px solid var(--ink-soft); background:transparent; color:var(--ink);}
+  .story-input:focus{outline:none; border-bottom-color:var(--rust);}
+  .story-input.correct{border-bottom-color:var(--good); background:#E4EBDD;}
+  .story-input.incorrect{border-bottom-color:var(--bad); background:#F3DEDA;}
+  .correct-hint{font-size:0.8em; color:var(--good); font-style:italic; margin-left:2px;}
+  .story-summary{background:var(--paper-card); border-bottom:1px dashed var(--line); padding-bottom:10px; margin-bottom:14px; font-size:0.88rem; color:var(--ink-soft);}
+  .story-actions{margin-top:20px; display:flex; justify-content:space-between; align-items:center;}
+
+  .results{text-align:center; margin:auto;}
+  .results .big{font-size:2.6rem; font-weight:600; color:var(--rust-deep); margin-bottom:6px;}
+  .results p{color:var(--ink-soft); margin-bottom:24px;}
+
+  @media (max-width:480px){
+    .match-grid{gap:10px;}
+    .match-item{font-size:0.8rem; padding:10px;}
+    .prompt-word{font-size:1.4rem;}
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <header>
+    <h1>Словарь: lore — strip mall</h1>
+    <p>25 слов · пять режимов тренировки</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-mode="quiz">Тест</button>
+    <button class="tab-btn" data-mode="fill">Пропуски</button>
+    <button class="tab-btn" data-mode="match">Сопоставление</button>
+    <button class="tab-btn" data-mode="translate">Перевод</button>
+    <button class="tab-btn" data-mode="story">Рассказ</button>
+  </nav>
+
+  <div class="card" id="cardRoot"></div>
+</div>
+
+<script>
+const WORDS = [
+  {w:"lore", m:"предания, накопленные знания, фольклор", s:"Even outside the game, fans obsessed over its ___."},
+  {w:"propitious", m:"благоприятный, многообещающий", s:"It wasn't the most ___ moment to ask for a raise."},
+  {w:"trudge", m:"идти тяжело, через силу", s:"Outside, he forced himself to ___ through the rain toward the precinct."},
+  {w:"redolent", m:"напоминающий, навевающий ассоциации (redolent of)", s:"The whole case felt ___ of something they'd worked years ago."},
+  {w:"bromide", m:"банальность, избитая утешительная фраза", s:"Hotch warned the team against offering the family empty ___s."},
+  {w:"fledgling", m:"новичок, начинающий; птенец", s:"The lead detective was practically a ___, barely six months into homicide."},
+  {w:"brazenness", m:"наглость, беззастенчивость", s:"Prentiss was struck by the sheer ___ of the suspect's alibi."},
+  {w:"purloined", m:"похищенный, украденный", s:"Forensics confirmed the watch had been ___ from the first victim's apartment."},
+  {w:"parched", m:"пересохший; хотящий пить", s:"By the third day, everyone's throat felt ___ from the dry station air."},
+  {w:"nascent", m:"зарождающийся, начинающий формироваться", s:"Reid called the theory ___, still in its earliest stages."},
+  {w:"fraught", m:"напряжённый; чреватый", s:"The negotiations with the lawyer grew more ___ by the hour."},
+  {w:"grok", m:"глубоко, интуитивно понимать", s:"It took Reid almost no time at all to ___ the killer's twisted logic."},
+  {w:"decrepit", m:"дряхлый, ветхий, обветшалый", s:"The house itself looked ___, paint peeling, porch sagging."},
+  {w:"buoyant", m:"жизнерадостный, бодрый; плавучий", s:"Despite everything, JJ stayed ___, refusing to let the case wear her down."},
+  {w:"shuffle", m:"шаркать, волочить ноги", s:"The suspect tried to ___ quietly past the officer at the door."},
+  {w:"arbitrary", m:"произвольный, не основанный на логике", s:"His reasons for choosing that street felt almost ___."},
+  {w:"wallow", m:"упиваться (жалостью, горем)", s:"Alone that night, Prentiss let herself ___ in the exhaustion of the week."},
+  {w:"duress", m:"принуждение, давление", s:"The confession had clearly been given under ___."},
+  {w:"sage", m:"мудрец; мудрый", s:"\"Patience,\" the old desk ___ always told the rookies, \"solves more cases than instinct.\""},
+  {w:"bleak", m:"мрачный, безрадостный; суровый (пейзаж)", s:"The forecast for the stakeout looked ___: cold, grey, and endless."},
+  {w:"no dice", m:"не вышло, не получилось (разг.)", s:"\"Can we get the warrant by morning?\" \"___,\" the DA said."},
+  {w:"blow one's wad", m:"потратить всё сразу, выложиться по полной (разг.)", s:"Morgan admitted he'd basically ___ on overtime pay just to close the case."},
+  {w:"hat in hand", m:"смиренно, с почтением (просить о чём-то)", s:"He hated having to go ___ to his captain afterward."},
+  {w:"come out of the woodwork", m:"внезапно появляться в большом количестве (разг.)", s:"Once the story broke, tipsters ___, every one of them certain they'd seen the suspect."},
+  {w:"strip mall", m:"торговый центр открытого типа (США)", s:"The last confirmed sighting had been behind a run-down ___ on the edge of town."}
+];
+
+function isAnswerCorrect(rawInput, correctWord){
+  const val = rawInput.trim().toLowerCase().replace(/\s+/g," ").replace(/[.,!?;:]$/,"");
+  const base = correctWord.toLowerCase();
+  return val === base || val === base + "s" || val === base.replace(/e$/,"ing");
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let currentMode = "quiz";
+const root = document.getElementById("cardRoot");
+
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentMode = btn.dataset.mode;
+    startMode(currentMode);
+  });
+});
+
+/* ================= QUIZ MODE ================= */
+let quizOrder, quizIndex, quizScore;
+
+function startQuiz(){
+  quizOrder = shuffle(WORDS);
+  quizIndex = 0;
+  quizScore = 0;
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion(){
+  if(quizIndex >= quizOrder.length){ renderResults(quizScore, quizOrder.length, startQuiz); return; }
+  const item = quizOrder[quizIndex];
+  const wrongPool = WORDS.filter(x=>x.w!==item.w);
+  const distractors = shuffle(wrongPool).slice(0,3).map(x=>x.m);
+  const options = shuffle([item.m, ...distractors]);
+
+  root.innerHTML = `
+    <div class="progress-row"><span>Вопрос ${quizIndex+1} из ${quizOrder.length}</span><span>Счёт: ${quizScore}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(quizIndex/quizOrder.length)*100}%"></div></div>
+    <p class="prompt-word">${item.w}</p>
+    <div class="options">
+      ${options.map(o=>`<button class="option" data-correct="${o===item.m}">${o}</button>`).join("")}
+    </div>
+    <div class="feedback" id="qFeedback"></div>
+    <div class="footer-row"><span></span><button class="btn" id="nextBtn" disabled>Далее</button></div>
+  `;
+
+  const optBtns = root.querySelectorAll(".option");
+  optBtns.forEach(b=>{
+    b.addEventListener("click", ()=>{
+      optBtns.forEach(x=>x.disabled=true);
+      const fb = document.getElementById("qFeedback");
+      if(b.dataset.correct==="true"){
+        b.classList.add("correct");
+        fb.textContent = "Верно!";
+        fb.className = "feedback good";
+        quizScore++;
+      } else {
+        b.classList.add("incorrect");
+        optBtns.forEach(x=>{ if(x.dataset.correct==="true") x.classList.add("correct"); });
+        fb.textContent = "Правильный ответ выделен зелёным.";
+        fb.className = "feedback bad";
+      }
+      document.getElementById("nextBtn").disabled = false;
+    });
+  });
+
+  document.getElementById("nextBtn").addEventListener("click", ()=>{ quizIndex++; renderQuizQuestion(); });
+}
+
+/* ================= FILL IN THE BLANK ================= */
+let fillOrder, fillIndex, fillScore;
+
+function startFill(){
+  fillOrder = shuffle(WORDS);
+  fillIndex = 0;
+  fillScore = 0;
+  renderFillQuestion();
+}
+
+function renderFillQuestion(){
+  if(fillIndex >= fillOrder.length){ renderResults(fillScore, fillOrder.length, startFill); return; }
+  const item = fillOrder[fillIndex];
+  const sentenceHtml = item.s.replace("___", `<span class="gap">?</span>`);
+
+  root.innerHTML = `
+    <div class="progress-row"><span>Слово ${fillIndex+1} из ${fillOrder.length}</span><span>Счёт: ${fillScore}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(fillIndex/fillOrder.length)*100}%"></div></div>
+    <p style="color:var(--ink-soft); margin-bottom:6px;">Значение: <strong style="color:var(--ink);">${item.m}</strong></p>
+    <p class="sentence">${sentenceHtml}</p>
+    <div class="fill-input-row">
+      <input type="text" id="fillInput" placeholder="Впиши слово..." autocomplete="off">
+      <button class="btn" id="checkBtn">Проверить</button>
+    </div>
+    <div class="feedback" id="fFeedback"></div>
+    <div class="footer-row"><span></span><button class="btn secondary" id="fNextBtn" style="display:none;">Далее</button></div>
+  `;
+
+  const input = document.getElementById("fillInput");
+  const checkBtn = document.getElementById("checkBtn");
+  const fb = document.getElementById("fFeedback");
+  const nextBtn = document.getElementById("fNextBtn");
+
+  function check(){
+    input.disabled = true;
+    checkBtn.disabled = true;
+    if(isAnswerCorrect(input.value, item.w)){
+      fb.textContent = "Верно!";
+      fb.className = "feedback good";
+      fillScore++;
+    } else {
+      fb.textContent = `Правильный ответ: ${item.w}`;
+      fb.className = "feedback bad";
+    }
+    nextBtn.style.display = "inline-block";
+  }
+
+  checkBtn.addEventListener("click", check);
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+  nextBtn.addEventListener("click", ()=>{ fillIndex++; renderFillQuestion(); });
+  input.focus();
+}
+
+/* ================= MATCHING ================= */
+let matchWords, matchDefs, matchSelectedWord, matchSelectedDef, matchedCount, matchTotal;
+
+function startMatch(){
+  const batch = shuffle(WORDS).slice(0,6);
+  matchWords = shuffle(batch);
+  matchDefs = shuffle(batch);
+  matchSelectedWord = null;
+  matchSelectedDef = null;
+  matchedCount = 0;
+  matchTotal = batch.length;
+  renderMatch();
+}
+
+function renderMatch(){
+  root.innerHTML = `
+    <div class="progress-row"><span>Сопоставлено: ${matchedCount} из ${matchTotal}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(matchedCount/matchTotal)*100}%"></div></div>
+    <p style="color:var(--ink-soft); margin-bottom:14px; font-size:0.9rem;">Нажми на слово, затем на его перевод.</p>
+    <div class="match-grid">
+      <div class="match-col" id="wordCol">${matchWords.map(x=>`<button class="match-item" data-word="${x.w}">${x.w}</button>`).join("")}</div>
+      <div class="match-col" id="defCol">${matchDefs.map(x=>`<button class="match-item" data-word="${x.w}">${x.m}</button>`).join("")}</div>
+    </div>
+  `;
+
+  document.querySelectorAll("#wordCol .match-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("matched")) return;
+      document.querySelectorAll("#wordCol .match-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      matchSelectedWord = el;
+      tryMatch();
+    });
+  });
+  document.querySelectorAll("#defCol .match-item").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      if(el.classList.contains("matched")) return;
+      document.querySelectorAll("#defCol .match-item").forEach(x=>x.classList.remove("selected"));
+      el.classList.add("selected");
+      matchSelectedDef = el;
+      tryMatch();
+    });
+  });
+}
+
+function tryMatch(){
+  if(!matchSelectedWord || !matchSelectedDef) return;
+  if(matchSelectedWord.dataset.word === matchSelectedDef.dataset.word){
+    matchSelectedWord.classList.remove("selected");
+    matchSelectedDef.classList.remove("selected");
+    matchSelectedWord.classList.add("matched");
+    matchSelectedDef.classList.add("matched");
+    matchedCount++;
+    matchSelectedWord = null;
+    matchSelectedDef = null;
+    document.querySelector(".progress-row span").textContent = `Сопоставлено: ${matchedCount} из ${matchTotal}`;
+    document.querySelector(".progress-fill").style.width = `${(matchedCount/matchTotal)*100}%`;
+    if(matchedCount === matchTotal){
+      setTimeout(()=>renderResults(matchTotal, matchTotal, startMatch, true), 500);
+    }
+  } else {
+    const w = matchSelectedWord, d = matchSelectedDef;
+    w.classList.add("wrong-flash");
+    d.classList.add("wrong-flash");
+    setTimeout(()=>{ w.classList.remove("selected","wrong-flash"); d.classList.remove("selected","wrong-flash"); }, 450);
+    matchSelectedWord = null;
+    matchSelectedDef = null;
+  }
+}
+
+/* ================= TRANSLATE MODE (RU -> EN) ================= */
+let trOrder, trIndex, trScore;
+
+function startTranslate(){
+  trOrder = shuffle(WORDS);
+  trIndex = 0;
+  trScore = 0;
+  renderTranslateQuestion();
+}
+
+function renderTranslateQuestion(){
+  if(trIndex >= trOrder.length){ renderResults(trScore, trOrder.length, startTranslate); return; }
+  const item = trOrder[trIndex];
+
+  root.innerHTML = `
+    <div class="progress-row"><span>Слово ${trIndex+1} из ${trOrder.length}</span><span>Счёт: ${trScore}</span></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${(trIndex/trOrder.length)*100}%"></div></div>
+    <p style="color:var(--ink-soft); margin-bottom:8px; font-size:0.9rem;">Напиши слово по-английски:</p>
+    <p class="prompt-word" style="font-size:1.4rem;">${item.m}</p>
+    <div class="fill-input-row">
+      <input type="text" id="trInput" placeholder="type in English..." autocomplete="off">
+      <button class="btn" id="trCheckBtn">Проверить</button>
+    </div>
+    <div class="feedback" id="trFeedback"></div>
+    <div class="footer-row"><span></span><button class="btn secondary" id="trNextBtn" style="display:none;">Далее</button></div>
+  `;
+
+  const input = document.getElementById("trInput");
+  const checkBtn = document.getElementById("trCheckBtn");
+  const fb = document.getElementById("trFeedback");
+  const nextBtn = document.getElementById("trNextBtn");
+
+  function check(){
+    input.disabled = true;
+    checkBtn.disabled = true;
+    if(isAnswerCorrect(input.value, item.w)){
+      fb.textContent = "Верно!";
+      fb.className = "feedback good";
+      trScore++;
+    } else {
+      fb.textContent = `Правильный ответ: ${item.w}`;
+      fb.className = "feedback bad";
+    }
+    nextBtn.style.display = "inline-block";
+  }
+
+  checkBtn.addEventListener("click", check);
+  input.addEventListener("keydown", e=>{ if(e.key==="Enter") check(); });
+  nextBtn.addEventListener("click", ()=>{ trIndex++; renderTranslateQuestion(); });
+  input.focus();
+}
+
+/* ================= STORY WITH GAPS ================= */
+// Each [[n]] marker corresponds to WORDS[n] — words appear in the same
+// order as the WORDS array, once each, in their base dictionary form.
+const STORY_TEMPLATE = `Garcia still quoted the old forum [[0]] she'd grown up on, the kind of trivia nobody else on the team appreciated at 3 a.m. It wasn't the most [[1]] night for jokes, but it kept her awake. Outside, Morgan forced himself to [[2]] through the rain toward the precinct, exhausted after the stakeout.
+
+Rossi noticed the whole case felt [[3]] of something they'd worked years ago — same signature, same method. Hotch warned the team against offering the family empty [[4]]s; grief needed honesty, not platitudes. The lead detective on the case was practically a [[5]], barely six months into homicide, and he knew it. Still, Prentiss was struck by the [[6]] of the suspect's alibi — he hadn't even tried to hide the lie.
+
+Forensics confirmed the watch found at the scene had been [[7]] from the first victim's apartment. By the third day, everyone's throat felt [[8]] from the dry station air and too much coffee. Reid called the theory [[9]], still in its earliest stages, but worth testing. The negotiations with the suspect's lawyer grew more [[10]] by the hour.
+
+It took Reid almost no time at all to [[11]] the killer's twisted logic, piecing it together before anyone else in the room. The house itself looked [[12]], paint peeling, porch sagging under its own weight. Despite everything, JJ stayed [[13]], refusing to let the case wear her down. The suspect tried to [[14]] quietly past the officer at the door, but the floor creaked beneath him.
+
+His reasons for choosing that street felt almost [[15]], as if he'd picked it at random. Alone in her apartment that night, Prentiss let herself [[16]] in the exhaustion of the week, just for an hour. The confession, once it came, had clearly been given under [[17]] — his lawyer made sure of that. "Patience," the old desk [[18]] at the precinct always told the rookies, "solves more cases than instinct."
+
+The forecast for the stakeout looked [[19]]: cold, grey, and endless. "Can we get the warrant by morning?" Hotch asked. "[[20]]," the DA said. "Judge won't sign until the hearing." After the arrest, Morgan admitted he'd basically [[21]] on overtime pay just to close the case faster. Still, he went [[22]] to his captain afterward, asking for the extra hours back. Once the story broke, tipsters [[23]], every one of them certain they'd seen the suspect somewhere. The last confirmed sighting had been behind a run-down [[24]] on the edge of town.`;
+
+function startStory(){
+  const parts = STORY_TEMPLATE.split(/\[\[(\d+)\]\]/g);
+  let html = `
+    <div class="story-summary" id="storySummary">Впиши слово в словарной форме (как в списке) по первой букве-подсказке, даже если грамматика текста требует другой формы. Когда заполнишь все пропуски — нажми «Проверить всё».</div>
+    <div class="story-text">
+  `;
+  parts.forEach((part, i)=>{
+    if(i % 2 === 0){
+      html += part.replace(/\n\n/g, "</p><p>");
+    } else {
+      const idx = parseInt(part, 10);
+      const word = WORDS[idx].w;
+      html += `<span class="blank-wrap"><span class="hint-letter">${word[0]}</span><input type="text" class="story-input" data-idx="${idx}" size="${Math.max(4, word.length)}" autocomplete="off"><span class="correct-hint" id="hint-${idx}"></span></span>`;
+    }
+  });
+  html += `</div>
+    <div class="story-actions">
+      <button class="btn secondary" id="storyRestartBtn">Новый текст</button>
+      <button class="btn" id="storyCheckBtn">Проверить всё</button>
+    </div>
+  `;
+  root.innerHTML = html;
+
+  document.getElementById("storyCheckBtn").addEventListener("click", checkStory);
+  document.getElementById("storyRestartBtn").addEventListener("click", startStory);
+}
+
+function checkStory(){
+  const inputs = document.querySelectorAll(".story-input");
+  let correctCount = 0;
+  inputs.forEach(inp=>{
+    const idx = parseInt(inp.dataset.idx, 10);
+    const word = WORDS[idx].w;
+    inp.disabled = true;
+    const ok = isAnswerCorrect(inp.value, word);
+    if(ok) correctCount++;
+    inp.classList.add(ok ? "correct" : "incorrect");
+    if(!ok){
+      const hintEl = document.getElementById(`hint-${idx}`);
+      if(hintEl) hintEl.textContent = `→ ${word}`;
+    }
+  });
+  const summary = document.getElementById("storySummary");
+  summary.innerHTML = `Результат: <strong>${correctCount} из ${inputs.length}</strong> верно. Неверные слова подписаны рядом с полем.`;
+  document.getElementById("storyCheckBtn").disabled = true;
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ================= RESULTS ================= */
+function renderResults(score, total, restartFn, isMatch){
+  root.innerHTML = `
+    <div class="results">
+      <div class="big">${isMatch ? "✓" : score + " / " + total}</div>
+      <p>${isMatch ? "Все пары найдены." : (score===total ? "Отличный результат!" : "Хорошая практика — можно повторить ещё раз.")}</p>
+      <button class="btn" id="restartBtn">Пройти ещё раз</button>
+    </div>
+  `;
+  document.getElementById("restartBtn").addEventListener("click", restartFn);
+}
+
+/* ================= INIT ================= */
+function startMode(mode){
+  if(mode==="quiz") startQuiz();
+  else if(mode==="fill") startFill();
+  else if(mode==="match") startMatch();
+  else if(mode==="translate") startTranslate();
+  else if(mode==="story") startStory();
+}
+
+startMode("quiz");
+</script>
+</body>
+</html>
